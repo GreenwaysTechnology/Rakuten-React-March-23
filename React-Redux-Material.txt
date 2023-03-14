@@ -804,30 +804,826 @@ Build Layouts based on compoenent composition
    Footer
      ->Copyright
 
+....................................................................................
+			  Modularzation and Project layout
+.....................................................................................
+
+It means to spilt code,and to keep inside folders and files
+
+Is there a recommended way to structure React projects?
+
+React doesn’t have opinions on how you put files into folders. That said there are a few common approaches popular in the ecosystem you may want to consider.
+
+1.Grouping by features or routes - This is recommended
+2.Grouping by file types -  This is not recommended for large 
+projects
 
 
+common/
+  Avatar.js
+  Avatar.css
+  APIUtils.js
+  APIUtils.test.js
+feed/
+  index.js
+  Feed.js
+  Feed.css
+  FeedStory.js
+  FeedStory.test.js
+  FeedAPI.js
+profile/
+  index.js
+  Profile.js
+  ProfileHeader.js
+  ProfileHeader.css
+  ProfileAPI.js
 
 
+profile,feed,customers,products,payments which are "features"
+
+Grouping by file type
+
+api/
+  APIUtils.js
+  APIUtils.test.js
+  ProfileAPI.js
+  UserAPI.js
+components/
+  Avatar.js
+  Avatar.css
+  Feed.js
+  Feed.css
+  FeedStory.js
+  FeedStory.test.js
+  Profile.js
+  ProfileHeader.js
+  ProfileHeader.css
+
+..............................................................................................
+				  Dynamic Page - Data Binding
+..............................................................................................
+
+Types of web
+
+1.static web
+   -only html markup,hand coded.
+2.dynamic web
+   - html is created on fly with data
+
+How to add data in the component /how to bind data in the component?
+
+data can be represented in many ways.
+
+-primitives - numbers,strings,boolean
+-objects - literal objects, objects created out of class/function
+-arrays - it is also object but collection 
+
+How to bind data inside jsx?
+
+let name='subramanian'
+
+<h1>Hello {name} </h1>
+
+{} -  databinding syntax.
+
+data binding can be
+{variable}
+{expression} - {10*10} {getValue()} {emp.id}
 
 
+import React from 'react'
+import ReactDOM from 'react-dom/client'
 
 
+//data binding {}
+let name = 'Subramanian Murugan'
+const Heading = () => <h1>Hello {name}</h1>
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<Heading></Heading>)
+
+Data can be declared for a component in two ways.
+
+1.data is supplied from outside the component.
+2.data is supplied within the component
 
 
+1.Data is supplied from outside the component.
+
+When component receives data from the outside, this pattern is called as "property pattern" / props pattern.
+
+Outside the component means what? What is outside for the component?
+
+YOu know very well , react creates components and assembles them in hierachical order(tree)
+in the tree model, the one component called as "parent" component and other components are called child component and sibiling components.
+
+outside means "Parent".
+
+    "Data is supplied from the parent compoent to child component" - Props pattern /Property pattern
 
 
+eg:
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+
+//here props is just conventional variable name 
+// function Greeting(props) {
+//     console.log(props)
+//     return <h1>Hello {props.name}</h1>
+// }
+
+const Greeting = props => {
+    console.log(props)
+    return <h1>Hello {props.name}</h1>
+}
+const App = () => {
+    //imperative syntax
+    //return Greeting('Subramanian')
+    //declarative syntax
+    //props or property syntax <Greeting propName="Value" />
+    return <Greeting name="Subramanian" />  // => Greeting('Subramanian)
+}
 
 
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+
+///////////////////////
+
+More Props
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+
+const Profile = props => {
+    return <div>
+        <h3>Id {props.id}</h3>
+        <h3>Name {props.name}</h3>
+        <h3>Status {props.status ? "Active" : "InActive"}</h3>
+    </div>
+}
+const App = () => {
+
+    return <>
+        <h1>Profile Information</h1>
+        <Profile id={1} name="Subramanian" status={true} />
+        <Profile id={2} name="Karthik" status={true} />
+    </>
+}
 
 
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+
+....
+How to destrcture props and display?
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+
+//Extract props from the Property object and display
+// const Profile = props => {
+//     const { id, name, status } = props;
+//     return <div>
+//         <h3>Id {id}</h3>
+//         <h3>Name {name}</h3>
+//         <h3>Status {status ? "Active" : "InActive"}</h3>
+//     </div>
+// }
+
+// const Profile = ({ id, name, status }) => {
+//     return <div>
+//         <h3>Id {id}</h3>
+//         <h3>Name {name}</h3>
+//         <h3>Status {status ? "Active" : "InActive"}</h3>
+//     </div>
+// }
+
+const Profile = ({ id, name, status }) => <div>
+    <h3>Id {id}</h3>
+    <h3>Name {name}</h3>
+    <h3>Status {status ? "Active" : "InActive"}</h3>
+</div>
+
+const App = () => {
+
+    return <>
+        <h1>Profile Information</h1>
+        <Profile id={1} name="Subramanian" status={true} />
+        <Profile id={2} name="Karthik" status={true} />
+    </>
+}
 
 
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+..............................................................................................
+			What if i dont supply Props to Component -Default Props
+.............................................................................................
+if you dont pass any property, we can supply default props which saves lot of runtime bugs.
+
+When you design component, it is highly recommended to have default Props- This is best Practice
+
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+
+const Profile = props => {
+    return <div>
+        <h3>Id {props.id}</h3>
+        <h3>Name {props.name}</h3>
+        <h3>Status {props.status ? "Active" : "InActive"}</h3>
+    </div>
+}
+//default Props
+Profile.defaultProps = {
+    id: 0,
+    name: 'default',
+    status: false
+}
+
+const App = () => {
+    return <>
+        <h1>Profile Information</h1>
+        <Profile id={1} name="Subramanian" status={true} />
+        <Profile id={2} name="Karthik" status={true} />
+        <Profile  />
+        <Profile name="Ram" />
+
+    </>
+}
 
 
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+....................................................................................
+			  Class compoents and Props
+
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+
+// class Profile extends React.Component {
+//     render() {
+//         return <div>
+//             <h3>Id {this.props.id}</h3>
+//             <h3>Name {this.props.name}</h3>
+//             <h3>Status {this.props.status ? "Active" : "InActive"}</h3>
+//         </div>
+//     }
+// }
+class Profile extends React.Component {
+    render() {
+        const { id, name, status } = this.props
+        return <div>
+            <h3>Id {id}</h3>
+            <h3>Name {name}</h3>
+            <h3>Status {status ? "Active" : "InActive"}</h3>
+        </div>
+    }
+}
+//default Props
+Profile.defaultProps = {
+    id: 0,
+    name: 'default',
+    status: false
+}
+
+const App = () => {
+    return <>
+        <h1>Profile Information</h1>
+        <Profile id={1} name="Subramanian" status={true} />
+        <Profile id={2} name="Karthik" status={true} />
+        <Profile />
+        <Profile name="Ram" />
+
+    </>
+}
 
 
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+....................................................................................
+			Object as Prop
+...................................................................................
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+
+// const Profile = props => {
+//     return <div>
+//         <h3>Id {props.profile.id}</h3>
+//         <h3>Name {props.profile.name}</h3>
+//         <h3>Status {props.profile.status ? "Active" : "InActive"}</h3>
+//     </div>
+// }
+
+const Profile = props => {
+    const { id, name, status, address: { city } } = props.profile
+    return <div>
+        <h3>Id {id}</h3>
+        <h3>Name {name}</h3>
+        <h3>City {city}</h3>
+        <h3>Status {status ? "Active" : "InActive"}</h3>
+    </div>
+}
+//default Props
+Profile.defaultProps = {
+    profile: {
+        id: 0,
+        name: 'default',
+        status: false,
+        address: {
+            city: 'city'
+        }
+    }
+}
+const App = () => {
+
+    let profile = {
+        id: 1,
+        name: 'Subramanian',
+        status: true,
+        address: {
+            city: 'Coimbatore'
+        }
+    }
+
+    return <>
+        <h1>Profile Information</h1>
+        <Profile profile={profile} />
+        <Profile/>
+
+    </>
+}
 
 
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+
+..............................................................................................
+			Property Validation or Property Constraints
+.............................................................................................
+
+Javascript is dynamic typed language, meaning that the type of variable is not verified during compile time.
+
+dyamic typed/weak typing
+
+var a=1;
+console.log(a) => 1 => type is number
+
+you can reinitalize the with different types
+a="hello"
+console.log(a) => "hello" => type is string
+
+In c: - Strongly typed  /static typed
+int a=10
+a="hello" -compile time error 
+
+Type script : Strongly static typed javascript
+
+let a:number =10;
+a="hello"
+
+
+Inside compoent if pass data , can i enforce the react that accept only the type what i want.
+
+Yes , we can do with help of property validator.
+Property validator gives only warning , it wont stop rendering incase there is any type error.
+
+
+in order to write property rule, react provides a separate lib "prop-types"
+
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import PropTypes from 'prop-types';
+
+const Profile = props => {
+    return <div>
+        <h3>Id {props.id}</h3>
+        <h3>Name {props.name}</h3>
+        <h3>Status {props.status ? "Active" : "InActive"}</h3>
+    </div>
+}
+//property Rules
+Profile.propTypes = {
+    id: PropTypes.number,
+    name:PropTypes.string,
+    status:PropTypes.bool
+}
+//default props
+Profile.defultProps = {
+    id:0,
+    name:'default Name',
+    status:false
+}
+
+const App = () => {
+
+    return <>
+        <h1>Profile Information</h1>
+        {/* <Profile id={"1"} name="Subramanian" status={true} /> */}
+        <Profile id={1} name="Subramanian" status={true} />
+        <Profile />
+
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+.....................................................................................	
+				Prop Drilling
+....................................................................................
+
+In Component driven methods, data is passed from the parent to child and child to its child and child as prop manually..
+
+
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+
+
+const Parent = props => {
+    return <>
+       <h2>Parent Component</h2>
+       <Child1 message={props.message} />
+    </>
+}
+const Child1 = props => {
+    return <>
+       <h2>Child1 Component</h2>
+       <Child2 message={props.message} />
+    </>
+}
+const Child2 = props => {
+    return <>
+       <h2>Child2 Component</h2>
+       <h3>Message : {props.message}</h3>
+    </>
+}
+
+const App = () => {
+
+    return <>
+        <Parent message="hello" />
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+
+....................................................................................
+			 Props Drilling and More Props-Property Rethrow
+....................................................................................
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+
+
+const Parent = props => {
+    return <>
+        <h2>Parent Component</h2>
+        <Child1 message={props.message} firstName={props.firstName} lastName={props.lastName} />
+    </>
+}
+const Child1 = props => {
+    return <>
+        <h2>Child1 Component</h2>
+        <Child2 message={props.message} firstName={props.firstName} lastName={props.lastName} />
+    </>
+}
+const Child2 = props => {
+    return <>
+        <h2>Child2 Component</h2>
+        <h3>{props.message} {props.firstName} {props.lastName}</h3>
+    </>
+}
+
+const App = () => {
+
+    return <>
+        <Parent message="Hello" firstName="Subramanian" lastName="Murugan" />
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+
+
+Look at the above code and see every component need to transfer props manually which makes the code complex.
+
+Solution : 
+  Rethrowing the props or Forwarding props using "JSX Spread syntax"
+
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+
+
+const Parent = props => {
+    return <>
+        <h2>Parent Component</h2>
+        {/* <Child1 message={props.message} firstName={props.firstName} lastName={props.lastName} /> */}
+        {/* Forwarding Props using jsx spread notation */}
+        <Child1 {...props} />
+    </>
+}
+const Child1 = props => {
+    return <>
+        <h2>Child1 Component</h2>
+        {/* Forwarding Props using jsx spread notation  and merging new props */}
+        <Child2 {...props} title="Child 2" />
+    </>
+}
+const Child2 = props => {
+    return <>
+        <h2>{props.title} Component</h2>
+        <h3>{props.message} {props.firstName} {props.lastName}</h3>
+    </>
+}
+
+const App = () => {
+
+    return <>
+        <Parent message="Hello" firstName="Subramanian" lastName="Murugan" />
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+
+..............................................................................................
+				What  can be a prop
+.............................................................................................
+
+Prop can be 
+
+1.data - numbers,strings,boolean,objects,arrays
+2.function - function as prop
+3.component /any html element can be prop
+
+Prop can be 
+
+1.static prop - discussed already
+2.dynamic prop - to be discussed
+
+
+Component as Prop
+.................
+
+<Container/>  - The component has no child
+
+<Container>  - The component has child
+   <Header>    - It is passed as child to Container
+</Container>
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+
+
+const Card = props => <div>
+    {props.children}
+</div>
+
+const Avatar = props => {
+    return <>
+        <p>Name : {props.name}</p>
+    </>
+}
+const App = () => {
+    return <>
+        <Card>
+            {/* Passing Component as props */}
+            <Avatar name="Subramanian" />
+            <Avatar name="Subramanian" />
+            <Avatar name="Subramanian" />
+        </Card>
+        <Card>
+            <h1>Hello</h1>
+        </Card>
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+.....................................................................................
+				List Rendering-Arrays
+.....................................................................................
+
+Simple List:
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+
+//simple List Rendering
+// const NumberList = props => {
+//   return <div>
+//        {props.nums}
+//   </div>
+// }
+const NumberList = props => {
+    return <div>
+        <ul>
+            {
+                props.nums.map(item => {
+                    return <li>{item}</li>
+                })
+            }
+        </ul>
+    </div>
+}
+
+const App = () => {
+    let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    return <>
+        <NumberList nums={data} />
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+
+...................................................................................
+
+Complex Data:
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { POSTS } from './mock-data/posts'
+
+// const Post = props => {
+//     const { posts } = props
+//     return <div>
+//         {
+//             posts.map(post => {
+//                 return <div>
+//                     <h2>ID {post.id} UserId {post.userId}</h2>
+//                     <h3>{post.title}</h3>
+//                     <p>{post.body}</p>
+//                 </div>
+//             })
+//         }
+//     </div>
+// }
+
+// const Post = ({ posts }) => <div>
+//     {
+//         posts.map(({ userId, id, title, body }) => <div key={id}>
+//             <h2>ID {id} UserId {userId}</h2>
+//             <h3>{title}</h3>
+//             <p>{body}</p>
+//         </div>)
+//     }
+// </div>
+
+const Post = ({ posts }) => <div>
+    {
+        posts.map(post => <div key={post.id}>
+            <PostDetails post={post} />
+        </div>)
+    }
+</div>
+// const PostDetails = ({post}) => <>
+//     <h2>ID {post.id} UserId {post.userId}</h2>
+//     <h3>{post.title}</h3>
+//     <p>{post.body}</p>
+// </>
+const PostDetails = ({ post: { id, userId, title, body } }) => <>
+    <h2>ID {id} UserId {userId}</h2>
+    <h3>{title}</h3>
+    <p>{body}</p>
+</>
+
+const App = () => {
+    return <>
+        <Post posts={POSTS} />
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+....................................................................................
+			 Styling in React
+
+Styles are applied to the component in two ways
+
+1.Global Style 
+  importing style in index.js file , so that style to be shared across the app
+
+2.Component Specific Style
+   Having Component specific styles.
+
+
+style can be added using 
+
+1.class attribute 
+2.style attribute
+
+
+Note :
+
+<div class="App">
+
+ React will throw warning like below
+
+Warning: Invalid DOM property `class`. Did you mean `className`?
+    at div
+    at Post (http://localhost:3000/static/js/bundle.js:56:5)
+    at App
+
+According jsx, html attributes should not be given directly rather we need to follow the rule called
+
+ "camelCase" 
+eg
+class = > className
+onclick = onClick
+
+List :
+accept acceptCharset accessKey action allowFullScreen alt async autoComplete
+autoFocus autoPlay capture cellPadding cellSpacing challenge charSet checked
+cite classID className colSpan cols content contentEditable contextMenu controls
+controlsList coords crossOrigin data dateTime default defer dir disabled
+download draggable encType form formAction formEncType formMethod formNoValidate
+formTarget frameBorder headers height hidden high href hrefLang htmlFor
+httpEquiv icon id inputMode integrity is keyParams keyType kind label lang list
+loop low manifest marginHeight marginWidth max maxLength media mediaGroup method
+min minLength multiple muted name noValidate nonce open optimum pattern
+placeholder poster preload profile radioGroup readOnly rel required reversed
+role rowSpan rows sandbox scope scoped scrolling seamless selected shape size
+sizes span spellCheck src srcDoc srcLang srcSet start step style summary
+tabIndex target title type useMap value width wmode wrap
+
+https://reactjs.org/docs/dom-elements.html
+
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { POSTS } from './mock-data/posts'
+import { Header } from './header/Header'
+
+import 'bootstrap/dist/css/bootstrap.css'
+import './index.css'
+import './App.css'
+
+
+// const Post = props => {
+//     const { posts } = props
+//     return <div>
+//         {
+//             posts.map(post => {
+//                 return <div>
+//                     <h2>ID {post.id} UserId {post.userId}</h2>
+//                     <h3>{post.title}</h3>
+//                     <p>{post.body}</p>
+//                 </div>
+//             })
+//         }
+//     </div>
+// }
+
+// const Post = ({ posts }) => <div>
+//     {
+//         posts.map(({ userId, id, title, body }) => <div key={id}>
+//             <h2>ID {id} UserId {userId}</h2>
+//             <h3>{title}</h3>
+//             <p>{body}</p>
+//         </div>)
+//     }
+// </div>
+
+const Post = ({ posts }) => <div className="App">
+    {
+        posts.map(post => <div key={post.id} className="card" style={{ width: '18rem' }}>
+            <PostDetails post={post} />
+        </div>)
+    }
+</div>
+// const PostDetails = ({post}) => <>
+//     <h2>ID {post.id} UserId {post.userId}</h2>
+//     <h3>{post.title}</h3>
+//     <p>{post.body}</p>
+// </>
+const PostDetails = ({ post: { id, userId, title, body } }) => <>
+    <div class="card-body">
+        <h5 className="card-title">id  {id} userId {userId}</h5>
+        <h5 className="card-title">{title}</h5>
+        <p className="card-body">{body}</p>
+    </div>
+</>
+
+const App = () => {
+    return <>
+        <Header>
+            <h1>IBM Blog</h1>
+        </Header>
+        <div className="container">
+            <div className="row">
+                <div className="col-sm">
+                  <Post posts={POSTS} />
+                </div>
+            </div>
+        </div>
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
 
 
 

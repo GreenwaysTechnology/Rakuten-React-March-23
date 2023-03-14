@@ -1,68 +1,75 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { POSTS } from './mock-data/posts'
+import { Header } from './header/Header'
+
+import 'bootstrap/dist/css/bootstrap.css'
+import './index.css'
+import './App.css'
 
 
-// const Blog = () => {
-//     return <article>
-//         <h1>React Components</h1>
-//         <ol>
-//             <li>Components are building blocks</li>
-//             <li>Components helps to reuse</li>
-//             <li>Components helps to scale ui</li>
-//         </ol>
-//     </article>
+// const Post = props => {
+//     const { posts } = props
+//     return <div>
+//         {
+//             posts.map(post => {
+//                 return <div>
+//                     <h2>ID {post.id} UserId {post.userId}</h2>
+//                     <h3>{post.title}</h3>
+//                     <p>{post.body}</p>
+//                 </div>
+//             })
+//         }
+//     </div>
 // }
 
-const BlogHeader = () => <h1>React Components</h1>
-
-//React Fragements: Invisible container element used to escape compile time error when if you miss root element
-
-// const BlogList = () => <div>
-//     <li>Components are building blocks</li>
-//     <li>Components helps to reuse</li>
-//     <li>Components helps to scale ui</li>
+// const Post = ({ posts }) => <div>
+//     {
+//         posts.map(({ userId, id, title, body }) => <div key={id}>
+//             <h2>ID {id} UserId {userId}</h2>
+//             <h3>{title}</h3>
+//             <p>{body}</p>
+//         </div>)
+//     }
 // </div>
-// const BlogList = () => <React.Fragment>
-//     <li>Components are building blocks</li>
-//     <li>Components helps to reuse</li>
-//     <li>Components helps to scale ui</li>
-// </React.Fragment> 
 
-//Fragements <> </>
-const BlogList = () => <>
-    <li>Components are building blocks</li>
-    <li>Components helps to reuse</li>
-    <li>Components helps to scale ui</li>
+const Post = ({ posts }) => <div className="App">
+    {
+        posts.map(post => <div key={post.id} className="card" style={{ width: '18rem' }}>
+            <PostDetails post={post} />
+        </div>)
+    }
+</div>
+// const PostDetails = ({post}) => <>
+//     <h2>ID {post.id} UserId {post.userId}</h2>
+//     <h3>{post.title}</h3>
+//     <p>{post.body}</p>
+// </>
+const PostDetails = ({ post: { id, userId, title, body } }) => <>
+    <div class="card-body">
+        <h5 className="card-title">id  {id} userId {userId}</h5>
+        <h5 className="card-title">{title}</h5>
+        <p className="card-body">{body}</p>
+    </div>
 </>
 
-const BlogContent = () => <ol>
-    <BlogList />
-</ol>
-
-const Article = () => <article>
-    <BlogHeader />
-    <BlogContent />
-</article>
-
-const Blog = () => {
+const App = () => {
     return <>
-        <Article />
-        <Article />
+     
+        <div className="container">
+        <Header>
+            <h1>IBM Blog</h1>
+        </Header>
+            <div className="row">
+                <div className="col-sm">
+                  <Post posts={POSTS} />
+                </div>
+            </div>
+        </div>
     </>
 }
-//entry Component or root component
-const App = () => {
-    return <div>
-        <Blog />
-        <Blog />
-        <Blog />
-        <Blog />
- 
-    </div>
-}
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(<App />)
-
-
 
