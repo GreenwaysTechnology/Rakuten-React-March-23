@@ -1,71 +1,79 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom/client'
-import { POSTS } from './mock-data/posts'
-import { Header } from './header/Header'
-
 import 'bootstrap/dist/css/bootstrap.css'
 import './index.css'
 import './App.css'
 
 
-// const Post = props => {
-//     const { posts } = props
-//     return <div>
-//         {
-//             posts.map(post => {
-//                 return <div>
-//                     <h2>ID {post.id} UserId {post.userId}</h2>
-//                     <h3>{post.title}</h3>
-//                     <p>{post.body}</p>
-//                 </div>
-//             })
-//         }
-//     </div>
-// }
 
-// const Post = ({ posts }) => <div>
-//     {
-//         posts.map(({ userId, id, title, body }) => <div key={id}>
-//             <h2>ID {id} UserId {userId}</h2>
-//             <h3>{title}</h3>
-//             <p>{body}</p>
-//         </div>)
-//     }
-// </div>
 
-const Post = ({ posts }) => <div className="App">
-    {
-        posts.map(post => <div key={post.id} className="card" style={{ width: '18rem' }}>
-            <PostDetails post={post} />
-        </div>)
+const Error = props => {
+    return <>
+        <h2>{props.error}</h2>
+    </>
+}
+const Spinner = props => {
+    return <>
+        <h2 style={{ backgroundColor: 'yellow' }}>Loading...</h2>
+    </>
+}
+
+const TodoList = props => {
+    const { todos } = props
+    return <ul className="list-group">
+        {todos.map((todo, index) => (
+            <li key={index} style={{ listStyle: 'none' }} >
+                <span style={{ margin: 10 }}>
+                    {todo.id}
+                </span>
+                <span>
+                    {todo.title}
+                </span>
+            </li>
+        ))}
+    </ul>
+}
+
+
+
+const Todos = props => {
+    let initalState = {
+        isLoaded: false, //spinner status
+        items: [], //data,
+        error: null
     }
-</div>
-// const PostDetails = ({post}) => <>
-//     <h2>ID {post.id} UserId {post.userId}</h2>
-//     <h3>{post.title}</h3>
-//     <p>{post.body}</p>
-// </>
-const PostDetails = ({ post: { id, userId, title, body } }) => <>
-    <div class="card-body">
-        <h5 className="card-title">id  {id} userId {userId}</h5>
-        <h5 className="card-title">{title}</h5>
-        <p className="card-body">{body}</p>
-    </div>
-</>
+    const [todos, setTodos] = useState(initalState)
+   
+    async function fetchTodos() {
+        //api calls
+        const url = 'https://jsonplaceholder.typicode.com/todos'
+        try {
+            const values = await (await fetch(url)).json()
+            setTodos({ ...todos, isLoaded: true, items: todos.items.concat(values) })
+        }
+        catch (err) {
+            setTodos({ ...todos, isLoaded: true, err: err })
+        }
+    }
+    //componentDidMount
+    useEffect(() => {
+        fetchTodos()
+    }, [])
+    const { error, isLoaded, items } = todos
+    //conditional Rendering
+    if (error) {
+        return <Error error={error} />
+    } else if (!isLoaded) {
+        return <Spinner />
+    } else {
+        return <TodoList todos={items} />
+    }
+
+}
 
 const App = () => {
     return <>
-     
-        <div className="container">
-        <Header>
-            <h1>IBM Blog</h1>
-        </Header>
-            <div className="row">
-                <div className="col-sm">
-                  <Post posts={POSTS} />
-                </div>
-            </div>
-        </div>
+        <Todos />
     </>
 }
 
