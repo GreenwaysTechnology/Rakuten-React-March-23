@@ -3143,8 +3143,457 @@ const App = () => {
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(<App />)
+..................................................................................
+				Redux
+...................................................................................
+
+What is Redux?
+   Redux is a lib,State management lib.
+
+As of now, we have kept state inside react component- View.
+To separate State from the view layer(react)
+
+We need to isloate state from the react and keep the state inside  lib called "Redux
+
+Redux is not only lib but also pattern for managining and updating application state, using event driven programming model called "actions"
+
+As of how state is encapulated inside component.
+
+How to declare state inside component?
+
+component-1
+
+ let state = {
+    counter:0
+ }
+ how to mutate -biz logic
+ setState(state=>{
+    return {...state,counter:state.counter+1}
+ })
+
+
+component-2
+ let state = {
+    counter:0
+ }
+ how to mutate -biz logic
+ setState(state=>{
+    return {...state,counter:state.counter+1}
+ })
+
+                        Redux and State  Management
+
+
+Redux is going to store all component state into one single object -Application State
+
+const appState = {
+  ....   
+}
+
+Core Concepts or Principles:
+............................
+
+1.State:
+   Redux maintains or stores the data in single object called as application state.
+2.Store
+   Store is object where Redux application state lives.
+   Store offers api to communicate from react and redux to react
+   Store is entry and exit point of react and redux
+3.reducer
+    You know very well how to mutate and where mutate state in react
+     ->Inside setState pure function.
+    Reducer is pure function which returns immutable object.
+
+4.actions
+    An action is like request in webserver, redux actions are plain javascript object
+ eg:
+  let counterAction = {
+	type:'counter/increment'
+  }
+ action may take input also called payload
+  let counterByAmount = {
+   type:'counter/increment',
+   payload:12
+ }
+
+5.Dispatcher 
+  It is transporter which transport action object from react to redux
+  Dispatcher is represented by a method called "dispatch"
+  dispatch is part of "Store object"
+  store.dispatch(action)
+..................................................................................					Building Redux
+...................................................................................
+
+in order to start redux we have two patterns
+
+1.old redux
+2.new redux called "Redux toolkit"
+
+We are going to use "Redux toolkit"
+
+For new Project:
+npx create-react-app myreduxapp --template redux
+
+for existing project
+
+npm install @reduxjs/toolkit  react-redux
 
 
 
+Reducer is a function:
+
+ reducer has to take two args - inital state, action
+
+
+React-Redux:
+ It is official react with redux binding lib, used to connect redux with react
+
+Roles:
+ =>Supply redux store object to the react
+ =>react can dispatch actions to redux
+ =>react can subscribe state changes from redux.
+
+Built in Object:
+ Provider
+   This is object/component reponsiable for sharing redux to react
+
+Note:
+ This is top level component in react and redux echo system
+
+  <Provider store={appStore}>
+	<Your Root Component>	
+ </Provider>
+
+Basic Example:
+..............
+import ReactDOM from 'react-dom/client'
+import 'bootstrap/dist/css/bootstrap.css'
+import { configureStore } from '@reduxjs/toolkit'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+//step 1: reducer
+const CounterReducer = (counter = 10, action) => {
+    //biz logic : immutable logic
+    switch (action.type) {
+        case 'counter/increment':
+            //return immutable logic
+            return counter + 1
+        default:
+            return counter; //default state/inital state
+    }
+}
+//Step 2: Create Store Object 
+const appStore = configureStore({
+    reducer: {
+        //list of Reducers
+        counter: CounterReducer
+    }
+})
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+//Step 4 : Consume state from the redux, and send actions to redux for mutation
+const Counter = props => {
+    //Grab state from the redux
+    const counter = useSelector(state => {
+        //Get counter from the counter reducer
+        return state.counter //appState.reducerName
+    })
+    //Get Dispatcher 
+    const dispatch = useDispatch()
+    //Write listener
+    const onIncrement = evt => {
+        //send action to redux to increment
+        let incrementAction = {
+            type: 'counter/increment'
+        }
+        dispatch(incrementAction)
+    }
+
+    return <div className="container">
+        <h1>Counter App</h1>
+        <h1>Counter : {counter}</h1>
+        <button onClick={onIncrement} className='btn btn-success'>+</button>
+    </div>
+
+}
+
+
+
+const App = () => {
+    return <>
+        {/* Step 3 */}
+        <Provider store={appStore}>
+            <Counter />
+        </Provider>
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+....................................................................................
+
+State as Literal Object:
+........................
+import ReactDOM from 'react-dom/client'
+import 'bootstrap/dist/css/bootstrap.css'
+import { configureStore } from '@reduxjs/toolkit'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+//step 1: reducer
+const CounterReducer = (counter = { value: 30 }, action) => {
+    //biz logic : immutable logic
+    switch (action.type) {
+        case 'counter/increment':
+            //return immutable logic
+            return { ...counter, value: counter.value + 1 }
+        default:
+            return counter; //default state/inital state
+    }
+}
+//Step 2: Create Store Object 
+const appStore = configureStore({
+    reducer: {
+        //list of Reducers
+        counter: CounterReducer
+    }
+})
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+//Step 4 : Consume state from the redux, and send actions to redux for mutation
+const Counter = props => {
+    //Grab state from the redux
+    const counter = useSelector(state => {
+        //Get counter from the counter reducer
+        return state.counter //appState.reducerName
+    })
+    //Get Dispatcher 
+    const dispatch = useDispatch()
+    //Write listener
+    const onIncrement = evt => {
+        //send action to redux to increment
+        let incrementAction = {
+            type: 'counter/increment'
+        }
+        dispatch(incrementAction)
+    }
+
+    return <div className="container">
+        <h1>Counter App</h1>
+        <h1>Counter : {counter.value}</h1>
+        <button onClick={onIncrement} className='btn btn-success'>+</button>
+    </div>
+
+}
+
+
+
+const App = () => {
+    return <>
+        {/* Step 3 */}
+        <Provider store={appStore}>
+            <Counter />
+        </Provider>
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+.....................................................................................
+
+Simplifying the Immutable Code using immer js produce api:
+..........................................................
+
+import ReactDOM from 'react-dom/client'
+import 'bootstrap/dist/css/bootstrap.css'
+import { configureStore } from '@reduxjs/toolkit'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+import { produce } from 'immer'
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+//step 1: reducer
+const CounterReducer = (counter = { value: 30 }, action) => {
+    //biz logic : immutable logic
+    switch (action.type) {
+        case 'counter/increment':
+            return produce(counter, draft => {
+                draft.value++
+            })
+        default:
+            return counter; //default state/inital state
+    }
+}
+//Step 2: Create Store Object 
+const appStore = configureStore({
+    reducer: {
+        //list of Reducers
+        counter: CounterReducer
+    }
+})
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+//Step 4 : Consume state from the redux, and send actions to redux for mutation
+const Counter = props => {
+    //Grab state from the redux
+    const counter = useSelector(state => {
+        //Get counter from the counter reducer
+        return state.counter //appState.reducerName
+    })
+    //Get Dispatcher 
+    const dispatch = useDispatch()
+    //Write listener
+    const onIncrement = evt => {
+        //send action to redux to increment
+        let incrementAction = {
+            type: 'counter/increment'
+        }
+        dispatch(incrementAction)
+    }
+
+    return <div className="container">
+        <h1>Counter App</h1>
+        <h1>Counter : {counter.value}</h1>
+        <button onClick={onIncrement} className='btn btn-success'>+</button>
+    </div>
+
+}
+
+
+
+const App = () => {
+    return <>
+        {/* Step 3 */}
+        <Provider store={appStore}>
+            <Counter />
+        </Provider>
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+....................................................................................
+
+How to write multiple reducers and consume data
+
+import ReactDOM from 'react-dom/client'
+import 'bootstrap/dist/css/bootstrap.css'
+import { configureStore } from '@reduxjs/toolkit'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+import { produce } from 'immer'
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+//step 1: reducer
+const CounterReducer = (counter = { value: 30 }, action) => {
+    //biz logic : immutable logic
+    switch (action.type) {
+        case 'counter/increment':
+            return produce(counter, draft => {
+                draft.value++
+            })
+        default:
+            return counter; //default state/inital state
+    }
+}
+//review Reducer
+
+const ReviewReducer = (review = { like: 0, dislike: 0 }, action) => {
+    switch (action.type) {
+        case 'review/like':
+            return produce(review, draft => {
+                draft.like++
+            })
+        case 'review/dislike':
+            return produce(review, draft => {
+                draft.dislike++
+            })
+        default:
+            return review; //default state/inital state
+    }
+}
+
+//Step 2: Create Store Object 
+const appStore = configureStore({
+    reducer: {
+        //list of Reducers
+        counter: CounterReducer,
+        review: ReviewReducer
+    }
+})
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+//Step 4 : Consume state from the redux, and send actions to redux for mutation
+const Counter = props => {
+    //Grab state from the redux
+    const counter = useSelector(state => {
+        //Get counter from the counter reducer
+        return state.counter //appState.reducerName
+    })
+    //Get Dispatcher 
+    const dispatch = useDispatch()
+    //Write listener
+    const onIncrement = evt => {
+        //send action to redux to increment
+        let incrementAction = {
+            type: 'counter/increment'
+        }
+        dispatch(incrementAction)
+    }
+
+    return <div className="container">
+        <h1>Counter Page</h1>
+        <h1>Counter : {counter.value}</h1>
+        <button onClick={onIncrement} className='btn btn-success'>+</button>
+    </div>
+
+}
+
+const Review = props => {
+    //Grab state from the redux
+    const review = useSelector(state => {
+        //Get Review from the Review reducer
+        return state.review //appState.reducerName
+    })
+    //Get Dispatcher 
+    const dispatch = useDispatch()
+
+    return <div className="container">
+        <h1>Review Page</h1>
+        <h1>like : {review.like} dislike {review.dislike}</h1>
+        <button onClick={() => {
+            dispatch({ type: 'review/like' })
+        }} className='btn btn-success'>Like</button>
+        <button style={{ margin: 10 }} onClick={() => {
+            dispatch({ type: 'review/dislike' })
+        }} className='btn btn-success'>Dislike</button>
+    </div>
+
+}
+
+const App = () => {
+    return <>
+        {/* Step 3 */}
+        <Provider store={appStore}>
+            <Counter />
+            <hr />
+            <Review />
+        </Provider>
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
 
 
