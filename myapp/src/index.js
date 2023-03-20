@@ -3,77 +3,45 @@ import ReactDOM from 'react-dom/client'
 import 'bootstrap/dist/css/bootstrap.css'
 import './index.css'
 import './App.css'
+import produce from 'immer'
 
-
-
-
-const Error = props => {
-    return <>
-        <h2>{props.error}</h2>
-    </>
-}
-const Spinner = props => {
-    return <>
-        <h2 style={{ backgroundColor: 'yellow' }}>Loading...</h2>
-    </>
-}
-
-const TodoList = props => {
-    const { todos } = props
-    return <ul className="list-group">
-        {todos.map((todo, index) => (
-            <li key={index} style={{ listStyle: 'none' }} >
-                <span style={{ margin: 10 }}>
-                    {todo.id}
-                </span>
-                <span>
-                    {todo.title}
-                </span>
-            </li>
-        ))}
-    </ul>
-}
-
-
-
-const Todos = props => {
-    let initalState = {
-        isLoaded: false, //spinner status
-        items: [], //data,
-        error: null
-    }
-    const [todos, setTodos] = useState(initalState)
-   
-    async function fetchTodos() {
-        //api calls
-        const url = 'https://jsonplaceholder.typicode.com/todos'
-        try {
-            const values = await (await fetch(url)).json()
-            setTodos({ ...todos, isLoaded: true, items: todos.items.concat(values) })
+const Player = props => {
+    const [player, setPlayer] = useState({
+        name: 'Subramanian',
+        house: {
+            name: 'RavenClaw',
+            points: 10 // increment this points
         }
-        catch (err) {
-            setTodos({ ...todos, isLoaded: true, err: err })
-        }
-    }
-    //componentDidMount
-    useEffect(() => {
-        fetchTodos()
-    }, [])
-    const { error, isLoaded, items } = todos
-    //conditional Rendering
-    if (error) {
-        return <Error error={error} />
-    } else if (!isLoaded) {
-        return <Spinner />
-    } else {
-        return <TodoList todos={items} />
+    })
+    const onAdd = evt => {
+        // setPlayer({
+        //     ...player,  // level -0 clone outter properties only 
+        //     house: {
+        //         ...player.house, // level 2
+        //         points: player.house.points + 2         //clone all properties except points
+        //     }
+        // })
+        setPlayer(player => {
+            return produce(player, draft => {
+                draft.house.points += 2
+            })
+        })
     }
 
+    return <div>
+        <h1>State Mutation using Immer</h1>
+        <h1>Name : {player.name}</h1>
+        <h2>House  Name {player.house.name}</h2>
+        <h2>Points {player.house.points}</h2>
+        <button onClick={onAdd} className="btn btn-success">Add Point</button>
+    </div>
 }
+
+
 
 const App = () => {
     return <>
-        <Todos />
+        <Player />
     </>
 }
 

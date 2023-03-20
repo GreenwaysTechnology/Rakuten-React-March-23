@@ -2798,9 +2798,6 @@ import 'bootstrap/dist/css/bootstrap.css'
 import './index.css'
 import './App.css'
 
-
-
-
 const Error = props => {
     return <>
         <h2>{props.error}</h2>
@@ -2874,6 +2871,280 @@ const App = () => {
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(<App />)
+....................................................................................
+			Complex State : Nexted State Mutations
+....................................................................................
+
+Adding new Prop and Updating existing prop in literal object.
+
+Add new prop on existing object?
+
+
+let something =  {
+  id:1,
+  name:'foo'
+}
+The object contains two properties, what if i want to add new Prop
+
+//eg:
+//impure function  
+// function addNewPower(hero) {
+//     hero.power = 'fly'
+//     return hero
+// }
+
+//pure function
+function addNewPower(hero) {
+    // hero.power = 'fly'
+    //if prop exits update else add 
+    return { ...hero, power: 'fly' }
+}
+
+let hero = {
+    id: 1,
+    name: 'foo'
+}
+let newHero = addNewPower(hero)
+console.log('Both Hero is same  ', hero === newHero)
+..................................................................................
+Complex state update - Nested Object update
+............................................
+//complex object update :
+
+
+//simple object update
+function updateHero(hero, role) {
+    return { ...hero, role: role }
+}
+
+let hero = {
+    id: 1,
+    name: 'foo',
+    role: 'Action'
+}
+let updatedHero = updateHero(hero, 'Dramma')
+console.log(hero === updatedHero ? 'same' : 'Different')
+
+console.log('Nest Properties')
+function incrementPoints(player, incrementBy) {
+    //increment by two 
+    return {
+        ...player,  // level -0 clone outter properties only 
+        house: {
+            ...player.house, // level 2
+            points: player.house.points + incrementBy         //clone all properties except points
+        }
+    }
+}
+
+let player = {
+    name: 'Subramanian',
+    house: {
+        name: 'RavenClaw',
+        points: 10 // increment this points
+    }
+}
+const updatedPlayer = incrementPoints(player, 2)
+console.log(player === updatedPlayer ? 'Same Player' : 'Different Player')
+...................................................................................
+
+let customer = {
+    id: 1,
+    name: 'Subramanian',
+    contact: {
+        address: {
+            city: 'Coimbatore'
+        },
+        communication: {
+            mobileno: '9000000000'
+        }
+    }
+}
+Write pure function to update Mobile No?
+
+function updateCustomer(customer, mobileNo) {
+
+    return {
+        ...customer, // level-0 id,name,contact
+        contact: {
+            ...customer.contact, // Level-1 // address
+            communication: {
+                ...customer.contact.communication, // Level -2
+                mobileno: mobileNo
+            }
+        }
+    }
+}
+let customer = {
+    id: 1,
+    name: 'Subramanian',
+    contact: {
+        address: {
+            city: 'Coimbatore'
+        },
+        communication: {
+            email: 'admin@gmail.com',
+            mobileno: '9000000000'
+        }
+    }
+}
+const updatedCustomer = updateCustomer(customer, '8098245789')
+console.log(updatedCustomer === customer ? 'Same Customer' : 'Different Customer')
+console.log(updatedCustomer)
+
+
+		    Can we simplify the above code?
+				Yes
+	     We have a new lib to abstract all immutablity complexity
+				"immer js"
+....................................................................................
+
+npm install immer
+
+import produce from "immer"
+
+function incrementPoints(player, incrementBy) {
+    //immutable function with plain js 
+    // return {
+    //     ...player,  // level -0 clone outter properties only 
+    //     house: {
+    //         ...player.house, // level 2
+    //         points: player.house.points + incrementBy         //clone all properties except points
+    //     }
+    // }
+
+    //mutable code but more readable.
+    //mutable style of writting immuable code:
+
+    // player.house.points = player.house.points + incrementBy
+    //return player
+    return produce(player, draftState => {
+        //write mutable logic
+        draftState.house.points += incrementBy
+    })
+}
+
+let player = {
+    name: 'Subramanian',
+    house: {
+        name: 'RavenClaw',
+        points: 10 // increment this points
+    }
+}
+const updatedPlayer = incrementPoints(player, 2)
+console.log(player === updatedPlayer ? 'Same Player' : 'Different Player')
+....................................................................................
+			React Component and immer js
+.....................................................................................
+
+import React, { useEffect, useState } from 'react'
+import ReactDOM from 'react-dom/client'
+import 'bootstrap/dist/css/bootstrap.css'
+import './index.css'
+import './App.css'
+import produce from 'immer'
+
+
+class Player extends React.Component {
+    state = {
+        name: 'Subramanian',
+        house: {
+            name: 'RavenClaw',
+            points: 10 // increment this points
+        }
+    }
+    onAdd = evt => {
+        // this.setState((oldState) => {
+        //     return {
+        //         ...oldState,  // level -0 clone outter properties only 
+        //         house: {
+        //             ...oldState.house, // level 2
+        //             points: oldState.house.points + 2         //clone all properties except points
+        //         }
+        //     }
+        // })
+        //using immer:
+        this.setState((oldState) => {
+            return produce(oldState, draft => {
+                draft.house.points += 2
+            })
+        })
+    }
+
+    render() {
+        return <div>
+            <h1>State Mutation using Immer</h1>
+            <h1>Name : {this.state.name}</h1>
+            <h2>House  Name {this.state.house.name}</h2>
+            <h2>Points {this.state.house.points}</h2>
+            <button onClick={this.onAdd} className="btn btn-success">Add Point</button>
+        </div>
+    }
+}
+
+
+const App = () => {
+    return <>
+        <Player />
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+.....................................................................................
+			Immer and hooks
+...................................................................................
+import React, { useEffect, useState } from 'react'
+import ReactDOM from 'react-dom/client'
+import 'bootstrap/dist/css/bootstrap.css'
+import './index.css'
+import './App.css'
+import produce from 'immer'
+
+const Player = props => {
+    const [player, setPlayer] = useState({
+        name: 'Subramanian',
+        house: {
+            name: 'RavenClaw',
+            points: 10 // increment this points
+        }
+    })
+    const onAdd = evt => {
+        // setPlayer({
+        //     ...player,  // level -0 clone outter properties only 
+        //     house: {
+        //         ...player.house, // level 2
+        //         points: player.house.points + 2         //clone all properties except points
+        //     }
+        // })
+        setPlayer(player => {
+            return produce(player, draft => {
+                draft.house.points += 2
+            })
+        })
+    }
+
+    return <div>
+        <h1>State Mutation using Immer</h1>
+        <h1>Name : {player.name}</h1>
+        <h2>House  Name {player.house.name}</h2>
+        <h2>Points {player.house.points}</h2>
+        <button onClick={onAdd} className="btn btn-success">Add Point</button>
+    </div>
+}
+
+const App = () => {
+    return <>
+        <Player />
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+
+
 
 
 
