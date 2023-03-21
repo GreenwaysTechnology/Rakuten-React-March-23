@@ -1,51 +1,40 @@
 import ReactDOM from 'react-dom/client'
 import 'bootstrap/dist/css/bootstrap.css'
-import { configureStore, createReducer } from '@reduxjs/toolkit'
+import { configureStore } from '@reduxjs/toolkit'
 import { Provider, useDispatch, useSelector } from 'react-redux'
+import { produce } from 'immer'
 
 //action constants
-const increment = 'counter/increment'
-const incrementBy = 'counter/incrementBy'
-const decrement = 'counter/decrement'
+const counterincrement = 'counter/increment'
+const counterincrementBy = 'counter/incrementBy'
 
-//reducer using createReducer api using Map Object notation  pattern
-const initalState = { value: 30 }
-// const counterReducer = createReducer(initalState, {
-//     //actionName hardcorded
-//     'counter/increment': (state, action) => {
-//         console.log(state.value)
-//         state.value++
-//     },
-//     'counter/decrement': (state, action) => {
-//         console.log(state.value)
-//         state.value--
-//     },
-//     'counter/incrementBy': (state, action) => {
-//         console.log(state.value)
-//         state.value = state.value + action.payload
-//     }
-// })
+const counterdecrement = 'counter/decrement'
 
-const counterReducer = createReducer(initalState, {
-    //action Name from the variable
-    [increment]: (state, action) => {
-        console.log(state.value)
-        state.value++
-    },
-    [decrement]: (state, action) => {
-        console.log(state.value)
-        state.value--
-    },
-    [incrementBy]: (state, action) => {
-        console.log(state.value)
-        state.value = state.value + action.payload
+
+const CounterReducer = (counter = { value: 30 }, action) => {
+    //biz logic : immutable logic
+    switch (action.type) {
+        case counterincrement:
+            return produce(counter, draft => {
+                draft.value++
+            })
+        case counterincrementBy:
+            return produce(counter, draft => {
+                draft.value += action.payload
+            })
+        case counterdecrement:
+            return produce(counter, draft => {
+                draft.value--
+            })
+        default:
+            return counter; //default state/inital state
     }
-})
+}
 
 const appStore = configureStore({
     reducer: {
         //list of Reducers
-        counter: counterReducer
+        counter: CounterReducer
     }
 })
 
@@ -65,7 +54,7 @@ const Counter = props => {
         //action creator
         const incrementActioncreator = payload => {
             return {
-                type: incrementBy,
+                type: counterincrementBy,
                 //payload:payload
                 payload
             }
@@ -79,10 +68,10 @@ const Counter = props => {
         <h1>Counter Page</h1>
         <h1>Counter : {counter.value}</h1>
         <button onClick={() => {
-            dispatch({ type: increment })
+            dispatch({ type: counterincrement })
         }} className='btn btn-success'>+</button>
         <button onClick={() => {
-            dispatch({ type: decrement })
+            dispatch({ type: counterincrement })
         }} className='btn btn-success'>-</button>
 
         <button onClick={onIncrementBy} className='btn btn-success'>IncrementBy</button>
@@ -94,8 +83,10 @@ const Counter = props => {
 
 const App = () => {
     return <>
+        {/* Step 3 */}
         <Provider store={appStore}>
             <Counter />
+
         </Provider>
     </>
 }

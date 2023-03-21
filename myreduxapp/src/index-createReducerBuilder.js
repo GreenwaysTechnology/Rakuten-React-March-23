@@ -8,38 +8,21 @@ const increment = 'counter/increment'
 const incrementBy = 'counter/incrementBy'
 const decrement = 'counter/decrement'
 
-//reducer using createReducer api using Map Object notation  pattern
-const initalState = { value: 30 }
-// const counterReducer = createReducer(initalState, {
-//     //actionName hardcorded
-//     'counter/increment': (state, action) => {
-//         console.log(state.value)
-//         state.value++
-//     },
-//     'counter/decrement': (state, action) => {
-//         console.log(state.value)
-//         state.value--
-//     },
-//     'counter/incrementBy': (state, action) => {
-//         console.log(state.value)
-//         state.value = state.value + action.payload
-//     }
-// })
-
-const counterReducer = createReducer(initalState, {
-    //action Name from the variable
-    [increment]: (state, action) => {
-        console.log(state.value)
+//reducer using createReducer api using builder callback pattern
+const initalState = { value: 10 }
+//createReducer takes two args one is initalState and another one is function which takes builder object as arg.
+//in createReducer immer js is built in we dont need to use produce function
+const counterReducer = createReducer(initalState, builder => {
+    //addCase takes two arg one is action name and produce function logic
+    builder.addCase(increment, (state, action) => {
         state.value++
-    },
-    [decrement]: (state, action) => {
-        console.log(state.value)
+    }).addCase(incrementBy, (state, action) => {
+        state.value += action.payload
+    }).addCase(decrement, (state, action) => {
         state.value--
-    },
-    [incrementBy]: (state, action) => {
-        console.log(state.value)
-        state.value = state.value + action.payload
-    }
+    }).addDefaultCase((state, action) => {
+        console.log('default case')
+    })
 })
 
 const appStore = configureStore({
