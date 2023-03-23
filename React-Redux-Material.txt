@@ -4197,8 +4197,824 @@ const App = () => {
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(<App />)
 ....................................................................................
-			
+		   How to create Actions using createAction 
 
+
+ createAction is helper fuction to create action.
+ it helps to create action creator too.
+
+ syntax:
+  function createAction(type,prepareAction?)
+
+import ReactDOM from 'react-dom/client'
+import 'bootstrap/dist/css/bootstrap.css'
+import { configureStore, createAction, createReducer } from '@reduxjs/toolkit'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+
+//action constants
+// const increment = 'counter/increment'
+// const incrementBy = 'counter/incrementBy'
+// const decrement = 'counter/decrement'
+
+//action creators
+const increment = createAction('counter/increment')
+const incrementBy = createAction('counter/incrementBy')
+const decrement = createAction('counter/decrement')
+
+//reducer using createReducer api using Map Object notation  pattern
+const initalState = { value: 30 }
+
+const counterReducer = createReducer(initalState, {
+    //action Name from the variable
+    [increment]: (state, action) => {
+        console.log(state.value)
+        state.value++
+    },
+    [decrement]: (state, action) => {
+        console.log(state.value)
+        state.value--
+    },
+    [incrementBy]: (state, action) => {
+        console.log(state.value)
+        state.value = state.value + action.payload
+    }
+})
+
+const appStore = configureStore({
+    reducer: {
+        //list of Reducers
+        counter: counterReducer
+    }
+})
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+//Step 4 : Consume state from the redux, and send actions to redux for mutation
+const Counter = props => {
+    //Grab state from the redux
+    const counter = useSelector(state => {
+        //Get counter from the counter reducer
+        return state.counter //appState.reducerName
+    })
+    //Get Dispatcher 
+    const dispatch = useDispatch()
+
+    const onIncrementBy = evt => {
+            //trigger with payload
+        dispatch(incrementBy(2))
+    }
+
+
+    return <div className="container">
+        <h1>Counter Page</h1>
+        <h1>Counter : {counter.value}</h1>
+        <button onClick={() => {
+            dispatch(increment())
+        }} className='btn btn-success'>+</button>
+        <button onClick={() => {
+            dispatch(decrement())
+        }} className='btn btn-success'>-</button>
+
+        <button onClick={onIncrementBy} className='btn btn-success'>IncrementBy</button>
+    </div>
+
+}
+
+
+
+const App = () => {
+    return <>
+        <Provider store={appStore}>
+            <Counter />
+        </Provider>
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+............................................................................
+			What if you see all in one place
+			  createSlice
+.................................................................................
+
+createSlice is abstraction for createAction and createReducer
+   You can auto generation actions and reducers out of slice.
+
+import ReactDOM from 'react-dom/client'
+import 'bootstrap/dist/css/bootstrap.css'
+import { configureStore, createSlice, } from '@reduxjs/toolkit'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+
+//slice = {reducers +actions}
+const counterSlice = createSlice({
+    name: 'counter',  //name used in action types : 'counter/increment'
+    initialState: {
+        value: 30
+    },
+    reducers: {
+        //object notation pattern
+        increment(state) {
+            state.value++
+        },
+        decrement(state) {
+            state.value--
+        },
+        incrementBy(state, action) {
+            state.value += action.payload
+        }
+    },
+    //builder callback api : it is recommended for typescript
+    extraReducers: builder => {
+        //builder.addCase
+        builder.addDefaultCase((state, action) => { })
+    }
+
+})
+console.log(counterSlice)
+//extract actions 
+const { increment, decrement, incrementBy } = counterSlice.actions
+console.log(increment())
+const counterReducer = counterSlice.reducer
+
+const appStore = configureStore({
+    reducer: {
+        //list of Reducers
+        counter: counterReducer
+    }
+})
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+//Step 4 : Consume state from the redux, and send actions to redux for mutation
+const Counter = props => {
+    //Grab state from the redux
+    const counter = useSelector(state => {
+        //Get counter from the counter reducer
+        return state.counter //appState.reducerName
+    })
+    //Get Dispatcher 
+    const dispatch = useDispatch()
+
+    const onIncrementBy = evt => {
+        //trigger with payload
+        dispatch(incrementBy(2))
+    }
+
+
+    return <div className="container">
+        <h1>Counter Page</h1>
+        <h1>Counter : {counter.value}</h1>
+        <button onClick={() => {
+            dispatch(increment())
+        }} className='btn btn-success'>+</button>
+        <button onClick={() => {
+            dispatch(decrement())
+        }} className='btn btn-success'>-</button>
+
+        <button onClick={onIncrementBy} className='btn btn-success'>IncrementBy</button>
+    </div>
+
+}
+
+
+
+const App = () => {
+    return <>
+        <Provider store={appStore}>
+            <Counter />
+        </Provider>
+    </>
+}
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+			.....................................................................................
+				Middlewares
+.....................................................................................
+
+Cross cutting concern.
+
+eg:
+logging
+
+
+Regular work flow:
+  store.dispatch(action)--------------------------|store-----Reducer---NewState
+
+Middleware work flow:
  
+			     middlewares
+store.dispatch(action)------------|||--------------|store-----Reducer---NewState
+
+
+configureStore
+ has default middlewares already
+
+const appStore = configureStore({
+    reducer: {
+        //list of Reducers
+        counter: counterReducer
+    },
+    middleware:[m1,m2,m3]
+})
+
+=>Immutability check middleware
+=>Serializability check middleware
+=>Thunk -> Async flows - api calls
+
+By default configureStore has three middlewares.
+
+if you want to add your own middleware /third party middleware , how to add it.
+
+Syntax -1 
+
+const store = configureStore({
+  reducer: rootReducer,
+  middleware: [thunk, logger],
+})
+
+// Store specifically has the thunk and logger middleware applied
+
+//Syntax-2
+const store = configureStore({
+  reducer: rootReducer,
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger)
+})
+
+Eg: 
+ Adding third party logger middleware
+
+npm i --save redux-logger
+
+
+import logger from 'redux-logger'
+
+const store = configureStore({
+  reducer: rootReducer,
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger)
+})
+...
+import ReactDOM from 'react-dom/client'
+import 'bootstrap/dist/css/bootstrap.css'
+import { configureStore, createSlice, } from '@reduxjs/toolkit'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+import logger from 'redux-logger'
+//slice = {reducers +actions}
+const counterSlice = createSlice({
+    name: 'counter',  //name used in action types : 'counter/increment'
+    initialState: {
+        value: 30
+    },
+    reducers: {
+        //object notation pattern
+        increment(state) {
+            state.value++
+        },
+        decrement(state) {
+            state.value--
+        },
+        incrementBy(state, action) {
+            state.value += action.payload
+        }
+    },
+    //builder callback api : it is recommended for typescript
+    extraReducers: builder => {
+        //builder.addCase
+        builder.addDefaultCase((state, action) => { })
+    }
+
+})
+//extract actions 
+const { increment, decrement, incrementBy } = counterSlice.actions
+const counterReducer = counterSlice.reducer
+
+const appStore = configureStore({
+    reducer: {
+        //list of Reducers
+        counter: counterReducer
+    },
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger)
+})
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+//Step 4 : Consume state from the redux, and send actions to redux for mutation
+const Counter = props => {
+    //Grab state from the redux
+    const counter = useSelector(state => {
+        //Get counter from the counter reducer
+        return state.counter //appState.reducerName
+    })
+    //Get Dispatcher 
+    const dispatch = useDispatch()
+
+    const onIncrementBy = evt => {
+        //trigger with payload
+        dispatch(incrementBy(2))
+    }
+
+
+    return <div className="container">
+        <h1>Counter Page</h1>
+        <h1>Counter : {counter.value}</h1>
+        <button onClick={() => {
+            dispatch(increment())
+        }} className='btn btn-success'>+</button>
+        <button onClick={() => {
+            dispatch(decrement())
+        }} className='btn btn-success'>-</button>
+
+        <button onClick={onIncrementBy} className='btn btn-success'>IncrementBy</button>
+    </div>
+
+}
+
+
+
+const App = () => {
+    return <>
+        <Provider store={appStore}>
+            <Counter />
+        </Provider>
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+.....................................................................................
+		      WebService calls and Redux
+.....................................................................................
+
+All web service calls must go via redux middleware only.
+Redux offers a special middleware called "thunk" - through which we can make api calls.
+Redux tool kit offers thunk as default middleware, so we dont need to install thunk middleware and configure
+
+
+Async Actions using Promises:
+..............................
+import ReactDOM from 'react-dom/client'
+import 'bootstrap/dist/css/bootstrap.css'
+import { configureStore, createAsyncThunk, createSlice, } from '@reduxjs/toolkit'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+import logger from 'redux-logger'
+
+
+//add async behaviour
+//api Which returns promise :
+export function fetchCount(amount = 1) {
+    return new Promise((resolve) =>
+        // setTimeout(() => resolve({ data: amount }), 500)
+        setTimeout(resolve, 5000, amount)
+    );
+}
+//create middleware which executes async task: createAsyncThunk
+const incrementAsync = createAsyncThunk('counter/fetchCount', async (amount) => {
+    const response = await fetchCount(amount);
+    // The value we return becomes the `fulfilled` action payload
+    return response;
+})
+
+const counterSlice = createSlice({
+    name: 'counter',  //name used in action types : 'counter/increment'
+    initialState: {
+        value: 10,
+        status: 'idle', //to track the status of promise idle | pending | fulfilled
+    },
+    reducers: {
+        increment(state) {
+            state.value++
+        },
+        decrement(state) {
+            state.value--
+        },
+        incrementBy(state, action) {
+            state.value += action.payload
+        }
+    },
+    //builder callback api : it is recommended for typescript
+    extraReducers: builder => {
+        //builder.addCase
+        console.log(builder)
+        builder.addCase(incrementAsync.pending, (state) => {
+            state.status = 'loading';
+        }).addCase(incrementAsync.fulfilled, (state, action) => {
+            state.status = 'fulfilled';
+            state.value = state.value + action.payload
+        })
+    }
+
+})
+//extract actions 
+const { increment, decrement, incrementBy } = counterSlice.actions
+const counterReducer = counterSlice.reducer
+
+const appStore = configureStore({
+    reducer: {
+        //list of Reducers
+        counter: counterReducer
+    },
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger)
+})
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+//Step 4 : Consume state from the redux, and send actions to redux for mutation
+const Counter = props => {
+    //Grab state from the redux
+    const counter = useSelector(state => {
+        //Get counter from the counter reducer
+        return state.counter //appState.reducerName
+    })
+    //Get Dispatcher 
+    const dispatch = useDispatch()
+
+    const onIncrementBy = evt => {
+        //trigger with payload
+        dispatch(incrementBy(2))
+    }
+
+
+    return <div className="container">
+        <h1>Counter Page</h1>
+        <h1>Counter : {counter.value} {counter.status}</h1>
+        <button onClick={() => {
+            dispatch(increment())
+        }} className='btn btn-success'>+</button>
+        <button onClick={() => {
+            dispatch(decrement())
+        }} className='btn btn-success'>-</button>
+
+        <button onClick={onIncrementBy} className='btn btn-success'>IncrementBy</button>
+        <button
+            onClick={() => dispatch(incrementAsync(10))}
+        >
+            Add Async
+        </button>
+    </div>
+
+}
+
+const App = () => {
+    return <>
+        <Provider store={appStore}>
+            <Counter />
+        </Provider>
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+...................................................................................
+			  Redux -Toolkit async web service calls
+.....................................................................................
+
+import ReactDOM from 'react-dom/client'
+import 'bootstrap/dist/css/bootstrap.css'
+import { configureStore, createAsyncThunk, createSlice, } from '@reduxjs/toolkit'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+import { useEffect } from 'react'
+import logger from 'redux-logger'
+
+//api 
+function fetchTodos() {
+    const url = 'https://jsonplaceholder.typicode.com/todos'
+    return fetch(url)
+}
+const fetchTodosAsync = createAsyncThunk('todos/fetch', async () => {
+    const todos = await (await fetchTodos()).json()
+    return todos
+})
+
+const TodoSlice = createSlice({
+    name: 'todos',
+    initialState: {
+        entities: [],
+        loading: 'idle'
+    },
+    reducers: {},
+    extraReducers: builder => {
+        builder.addCase(fetchTodosAsync.fulfilled, (state, action) => {
+            state.loading = 'fulfilled'
+            state.entities.push(action.payload)
+        })
+    }
+})
+const TodoReducer = TodoSlice.reducer
+
+const appStore = configureStore({
+    reducer: {
+        //list of Reducers
+        todo: TodoReducer
+    },
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger)
+})
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+//Step 4 : Consume state from the redux, and send actions to redux for mutation
+const Todos = props => {
+    const todos = useSelector(state => {
+        return state.todo
+    })
+    // console.log(todos.entities[0])
+    //Get Dispatcher 
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        dispatch(fetchTodosAsync())
+    }, [])
+    
+    const { loading, entities } = todos
+    console.log(entities)
+    if (loading === 'fulfilled') {
+        return <ul>
+            {
+                entities[0].map(todo => {
+                    return <li key={todo.id}>{todo.title}</li>
+                })
+            }
+        </ul>
+    }
+}
+
+const App = () => {
+    return <>
+        <Provider store={appStore}>
+            <Todos />
+        </Provider>
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<App />)
+.....................................................................................
+	       How to build single page web apps -Router
+.....................................................................................
+
+Create new App:
+...............
+
+npx create-react-app routerreduxreact --template redux
+
+
+React-Router:
+  It is a lib for building spa.
+
+How to install react router?
+ 
+ npm install react-router-dom
+
+
+Core concepts:
+  In spa there is only one physical page - index.html
+  Rest of every thing is going to be virtual pages or partials
+  Every page is component and its tree.
+
+MenuBar
+ Menu Item
+
+Url mapping or path mapping
+component binding with an url.
+
+
+Basic Router :
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { Provider } from 'react-redux';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import './index.css';
+
+
+const Home = props => <h1>Home</h1>
+const Counter = props => <h1>Counter</h1>
+
+
+//router configuration
+const router = createBrowserRouter([
+    {
+        path: "/", //url mapping
+        element: <Home />
+    },
+    {
+        path: "/counter", //url mapping
+        element: <Counter />
+    }
+
+])
+
+const App = props => {
+    return <div>
+        <h1>React Router App</h1>
+        {/* <Home/>
+        <Counter/> */}
+        <RouterProvider router={router} />
+
+    </div>
+}
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(<App />);
+
+How to test the above app?
+
+ http://localhost:3000
+ http://localhost:3000/counter
+....................................................................................
+		    Navigating between Pages
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter, Routes, Route, Link, Outlet } from 'react-router-dom';
+import './index.css';
+
+//components
+const Home = props => <h1>Home</h1>
+const AboutUs = props => <h1>About Us</h1>
+const Counter = props => <h1>Counter</h1>
+const DashBoard = props => <h1>Dashboard</h1>
+
+
+//create Layout Component
+const Layout = props => {
+    // Menus
+    return <nav>
+        <ul>
+            <li>
+                <Link to="/">Home</Link>
+            </li>
+            <li>
+                <Link to="/about">About</Link>
+            </li>
+            <li>
+                <Link to="/dashboard">Dashboard</Link>
+            </li>
+            <li>
+                <Link to="/counter">Counter</Link>
+            </li>
+        </ul>
+        <hr />
+        {/* Place holder to render compoents */}
+        <Outlet />
+    </nav>
+}
+
+// Root Navigation
+const App = props => {
+    return <div>
+        <h1>Router App</h1>
+        <Routes>
+            <Route path="/" element={<Layout />}>
+                <Route index element={<Home />} />
+                <Route path="about" element={<AboutUs />} />
+                <Route path="dashboard" element={<DashBoard />} />
+                <Route path="counter" element={<Counter />} />
+            </Route>
+        </Routes>
+    </div>
+}
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(<>
+    <BrowserRouter>
+        <App />
+    </BrowserRouter>
+</>);
+...................................................................................
+			  Counter redux logic with Router
+..................................................................................
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter, Routes, Route, Link, Outlet } from 'react-router-dom';
+import './index.css';
+import { configureStore, createAsyncThunk, createSlice, } from '@reduxjs/toolkit'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+
+
+const counterSlice = createSlice({
+    name: 'counter',  //name used in action types : 'counter/increment'
+    initialState: {
+        value: 30
+    },
+    reducers: {
+        //object notation pattern
+        increment(state) {
+            state.value++
+        },
+        decrement(state) {
+            state.value--
+        },
+        incrementBy(state, action) {
+            state.value += action.payload
+        }
+    },
+    //builder callback api : it is recommended for typescript
+    extraReducers: builder => {
+        //builder.addCase
+        builder.addDefaultCase((state, action) => { })
+    }
+
+})
+//extract actions 
+const { increment, decrement, incrementBy } = counterSlice.actions
+const counterReducer = counterSlice.reducer
+
+const appStore = configureStore({
+    reducer: {
+        //list of Reducers
+        counter: counterReducer
+    },
+})
+
+
+//components
+const Home = props => <h1>Home</h1>
+const AboutUs = props => <h1>About Us</h1>
+const DashBoard = props => <h1>Dashboard</h1>
+const Counter = props => {
+    //Grab state from the redux
+    const counter = useSelector(state => {
+        //Get counter from the counter reducer
+        return state.counter //appState.reducerName
+    })
+    //Get Dispatcher 
+    const dispatch = useDispatch()
+
+    const onIncrementBy = evt => {
+        //trigger with payload
+        dispatch(incrementBy(2))
+    }
+
+
+    return <div className="container">
+        <h1>Counter Page</h1>
+        <h1>Counter : {counter.value}</h1>
+        <button onClick={() => {
+            dispatch(increment())
+        }} className='btn btn-success'>+</button>
+        <button onClick={() => {
+            dispatch(decrement())
+        }} className='btn btn-success'>-</button>
+
+        <button onClick={onIncrementBy} className='btn btn-success'>IncrementBy</button>
+    </div>
+
+}
+
+//create Layout Component
+const Layout = props => {
+    // Menus
+    return <nav>
+        <ul>
+            <li>
+                <Link to="/">Home</Link>
+            </li>
+            <li>
+                <Link to="/about">About</Link>
+            </li>
+            <li>
+                <Link to="/dashboard">Dashboard</Link>
+            </li>
+            <li>
+                <Link to="/counter">Counter</Link>
+            </li>
+        </ul>
+        <hr />
+        {/* Place holder to render compoents */}
+        <Outlet />
+    </nav>
+}
+
+// Root Navigation
+const App = props => {
+    return <div>
+        <h1>Router App</h1>
+        <Routes>
+            <Route path="/" element={<Layout />}>
+                <Route index element={<Home />} />
+                <Route path="about" element={<AboutUs />} />
+                <Route path="dashboard" element={<DashBoard />} />
+                <Route path="counter" element={<Counter />} />
+            </Route>
+        </Routes>
+    </div>
+}
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(<>
+    {/* Redux Provider must be top level component */}
+    <Provider store={appStore}>
+        <BrowserRouter>
+            <App />
+        </BrowserRouter>
+    </Provider>
+</>);
+
+
+
+
+
+
 
 
