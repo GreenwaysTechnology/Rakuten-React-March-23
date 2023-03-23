@@ -2,7 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Link, Outlet } from 'react-router-dom';
 import './index.css';
-import { configureStore, createAsyncThunk, createSlice, } from '@reduxjs/toolkit'
+import { configureStore,  createSlice, } from '@reduxjs/toolkit'
 import { Provider, useDispatch, useSelector } from 'react-redux'
 
 
